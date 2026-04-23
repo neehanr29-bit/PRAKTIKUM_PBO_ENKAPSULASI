@@ -1,0 +1,59 @@
+#PRAKTIKUM ENKAPULASI
+class RekeningBank:
+  def __init__(self, saldo_awal):
+    self.__saldo = saldo_awal
+
+  def get_saldo(self):
+      return self.__saldo
+
+  def set_saldo(self, jumlah):
+      if jumlah >=0:
+        self.__saldo = jumlah
+      else:
+        print("Saldo tidak boleh negatif!:")
+
+  def deposit(self, jumlah):
+      if jumlah > 0 :
+          self.__saldo += jumlah
+          print(f"Berhasil deposit: {jumlah}")
+      else :
+        print("Jumlah deposit harus lebih dari 0")
+
+  def tarik(self, jumlah):
+      if jumlah > self.__saldo:
+          print("Saldo tidak cukup!")
+      elif jumlah <= 0:
+          print("Jumlah penarikan harus lebih dari 0")
+      else :
+        self.__saldo -= jumlah
+        print(f"Berhasil tarik: {jumlah} ")
+
+  def transfer(self, rekening_tujuan, jumlah):
+      biaya_admin = 2500
+      total_potongan = jumlah + biaya_admin
+
+      if jumlah < 50000:
+          print("Minimal jumlah transfer 50000")
+      else:
+        if self.__saldo >= total_potongan:
+           self.__saldo -= total_potongan
+           rekening_tujuan.deposit(jumlah)
+           print(f"Berhasil transfer {jumlah}. Biaya admin: {biaya_admin}")
+
+        else:
+          print("Saldo tidak cukup untuk transfer dan membayar admin")
+
+
+rekening = RekeningBank(100000)
+
+rekening.deposit(500000)
+rekening.tarik(200000)
+
+print(f"Saldo sekarang: {rekening.get_saldo()}")
+rekening_1 = RekeningBank(200000)
+rekening_2 = RekeningBank(100000)
+print("--- PROSES TRANSFER ---")
+rekening_1.transfer(rekening_2, 60000)
+print("\n--- SALDO AKHIR ---")
+print(f"Saldo rekening 1 {rekening_1.get_saldo()}")
+print(f"Saldo rekening 2 {rekening_2.get_saldo()}")
