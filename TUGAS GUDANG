@@ -1,1 +1,94 @@
+import datetime
 
+class Barang:
+    def __init__(self, id_barang, nama, harga_jual, harga_pokok):
+        self.id_barang = id_barang
+        self.nama = nama
+        self.harga_jual = harga_jual
+        self.__harga_pokok = harga_pokok
+        self.__pin_admin = "123456"
+
+    def info(self):
+        margin = self.harga_jual - self.__harga_pokok
+        return f"[{self.id_barang}] {self.nama:15} | Jual: Rp{self.harga_jual:<8,} | Margin: Rp{margin:<8,}"
+
+    def harga_pokok(self):
+        return self.__harga_pokok
+
+    def update_harga_pokok(self, harga_baru, pin_input):
+        if pin_input == self.__pin_admin:
+            if harga_baru > 0:
+                self.__harga_pokok = harga_baru
+                print(f"✅ Harga pokok {self.nama} berhasil diperbarui menjadi Rp{harga_baru:,}.")
+            else:
+                print("❌ Gagal: Harga pokok tidak boleh nol atau negatif!")
+        else:
+            print("❌ Gagal: PIN Salah! Anda tidak memiliki akses.")
+
+class BarangElektronik(Barang):
+    def __init__(self, id_barang, nama, harga_jual, harga_pokok, garansi):
+        super().__init__(id_barang, nama, harga_jual, harga_pokok)
+        self.garansi = garansi
+
+    def info(self):
+        return f"{super().info()} | Garansi: {self.garansi} bln"
+
+class BarangKonsumsi(Barang):
+    def __init__(self, id_barang, nama, harga_jual, harga_pokok, tgl_exp):
+        super().__init__(id_barang, nama, harga_jual, harga_pokok)
+        self.tgl_exp = tgl_exp
+
+    def info(self):
+        tgl_exp_obj = datetime.datetime.strptime(self.tgl_exp, "%Y-%m-%d").date()
+        hari_ini = datetime.date.today()
+
+        status_peringatan = ""
+        if tgl_exp_obj < hari_ini:
+            status_peringatan = " ⚠️ [KADALUARSA!]"
+
+        return f"{super().info()} | Exp: {self.tgl_exp}{status_peringatan}"
+
+class GudangPolimorfik:
+    def __init__(self):
+        self.koleksi = []
+
+    def tambah_barang(self, objek_barang):
+        self.koleksi.append(objek_barang)
+
+    def laporan_stok(self):
+        print("\n" + "="*90)
+        print(f"{'ID':4} | {'NAMA BARANG':15} | {'HARGA JUAL':14} | {'MARGIN':14} | {'KETERANGAN TAMBAHAN'}")
+        print("-" * 90)
+        for b in self.koleksi:
+            print(b.info())
+        print("="*90)
+
+def main():
+    app = GudangPolimorfik()
+
+    print("💾 Memasukkan data awal ke sistem...")
+    app.tambah_barang(BarangElektronik("E01", "Laptop Pro", 12000000, 10000000, 12))
+    app.tambah_barang(BarangKonsumsi("K02", "Roti Coklat", 15000, 10000, "2026-05-10"))
+    app.tambah_barang(BarangKonsumsi("K03", "Susu Murni", 12000, 9000, "2024-01-01"))
+    app.tambah_barang(Barang("U03", "Kabel Data", 25000, 15000))
+
+    app.laporan_stok()
+
+    print("\n🔒 UJI COBA FITUR ENKAPSULASI (Update Harga Pokok Roti Coklat):")
+    roti = app.koleksi[1]
+    print(f"-> Harga pokok awal Roti Coklat: Rp{roti.harga_pokok():,}")
+    
+    print("\n[Tes 1] Admin mencoba update dengan PIN '0000':")
+    roti.update_harga_pokok(12000, "0000")
+
+    print("\n[Tes 2] Admin mencoba update dengan nilai negatif (PIN Benar '123456'):")
+    roti.update_harga_pokok(-5000, "123456")
+
+    print("\n[Tes 3] Admin mengupdate harga dengan valid (PIN Benar '123456', nominal 11000):")
+    roti.update_harga_pokok(11000, "123456")
+
+    print("\n📈 Laporan Stok Setelah Update Harga Pokok:")
+    app.laporan_stok()
+
+if __name__ == "__main__":
+    main()
